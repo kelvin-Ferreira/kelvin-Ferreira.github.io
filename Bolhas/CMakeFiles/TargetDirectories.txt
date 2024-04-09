@@ -1,0 +1,3 @@
+/home/kelvin/Documentos/PDI/Bolhas/CMakeFiles/pixels.dir
+/home/kelvin/Documentos/PDI/Bolhas/CMakeFiles/edit_cache.dir
+/home/kelvin/Documentos/PDI/Bolhas/CMakeFiles/rebuild_cache.dir
