@@ -63,5 +63,5 @@ image::../PDI/Equalize/resultado.png[Imagem Resultado]
 
 [source, cpp]
 
-include::PDI/pixels.cpp[]
+include::../PDI/pixels.cpp[]
 
