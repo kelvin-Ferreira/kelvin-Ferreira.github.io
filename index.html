@@ -477,6 +477,46 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="title">Figure 1. Resultado: regions.cpp</div>
 </div>
+<div class="listingblock">
+<div class="title">Programa: regions.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main(int, char**) {
+  cv::Mat image;
+  cv::Vec3b val;
+
+  image = cv::imread("biel.png", cv::IMREAD_GRAYSCALE);
+  if (!image.data) std::cout &lt;&lt; "Nao abriu biel.png" &lt;&lt; std::endl;
+
+  cv::namedWindow("janela", cv::WINDOW_AUTOSIZE);
+  cv::Point p1, p2;
+  int aux = 0, i = 0, j = 0;
+  
+  std:: cout &lt;&lt; "Coordendas do ponto um\n";
+  std:: cin &gt;&gt; aux;
+  p1.x = aux;
+  std:: cin &gt;&gt; aux;
+  p1.y = aux;
+  std:: cout &lt;&lt; "Coordendas do ponto dois\n";
+  std:: cin &gt;&gt; aux;
+  p2.x = aux;
+  std:: cin &gt;&gt; aux;
+  p2.y = aux;
+  
+  for(i = p1.x; i &lt;= p2.x; i++){
+     for(j = p1.y; j &lt;= p2.y; j++){
+        image.at&lt;uchar&gt; (i, j) = 255 - image.at&lt;uchar&gt; (i, j);
+     }
+  }
+  	
+  cv::imshow("janela", image);
+  cv::waitKey();
+  return 0;
+}</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -489,6 +529,46 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <img src="../PDI/Swap/resultado.png" alt="Imagem Resultado">
 </div>
 <div class="title">Figure 2. Resultado: trocaregioes.cpp</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: trocaregioes.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main(int, char**) {
+  cv::Mat image;
+  cv::Vec3b val;
+  
+  image = cv::imread("biel.png", cv::IMREAD_GRAYSCALE);
+  
+  if (!image.data) std::cout &lt;&lt; "Nao abriu biel.png" &lt;&lt; std::endl;
+
+  cv::namedWindow("janela", cv::WINDOW_AUTOSIZE);
+  int i = 0, j = 0, h = 0, w = 0;
+  unsigned char aux;
+  h = image.rows;
+  w = image.cols;
+  
+  for(i = 0; i &lt; h; i++){
+     for(j = 0; j &lt; w; j++){
+        if(i &lt; h/2 &amp;&amp; j &lt; w/2){
+          aux = image.at&lt;uchar&gt; (i, j);
+          image.at&lt;uchar&gt; (i, j) = image.at&lt;uchar&gt; (i + h/2, j + w/2);
+          image.at&lt;uchar&gt; (i + h/2, j + w/2) = aux;
+        }else if (i &gt;= h/2 &amp;&amp; j &lt; w/2){
+                 aux = image.at&lt;uchar&gt; (i, j);
+                 image.at&lt;uchar&gt; (i, j) = image.at&lt;uchar&gt; (i - h/2 ,j + w/2);
+                 image.at&lt;uchar&gt; (i - h/2 ,j + w/2) = aux;
+        }  
+     }
+  }
+  	
+  cv::imshow("janela", image);
+  cv::waitKey();
+  return 0;
+}</code></pre>
+</div>
 </div>
 <div class="ulist">
 <ul>
@@ -510,6 +590,53 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="title">Figure 3. Resultado: senoide.cpp</div>
 </div>
+<div class="listingblock">
+<div class="title">Programa: senoide.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+
+int SIDE = 256;
+int PERIODOS = 4;
+
+int main(int argc, char** argv) {
+  std::stringstream ss_img, ss_yml;
+  cv::Mat image;
+
+  ss_yml &lt;&lt; "senoide-" &lt;&lt; SIDE &lt;&lt; ".yml";
+  image = cv::Mat::zeros(SIDE, SIDE, CV_32FC1);
+
+  cv::FileStorage fs(ss_yml.str(), cv::FileStorage::WRITE);
+
+  for (int i = 0; i &lt; SIDE; i++) {
+    for (int j = 0; j &lt; SIDE; j++) {
+      image.at&lt;float&gt;(i, j) = 127 * sin(2 * M_PI * PERIODOS * i / SIDE) + 128;
+    }
+  }
+
+  fs &lt;&lt; "mat" &lt;&lt; image;
+  fs.release();
+
+  cv::normalize(image, image, 0, 255, cv::NORM_MINMAX);
+  image.convertTo(image, CV_8U);
+  ss_img &lt;&lt; "senoide-" &lt;&lt; SIDE &lt;&lt; ".png";
+  cv::imwrite(ss_img.str(), image);
+
+  fs.open(ss_yml.str(), cv::FileStorage::READ);
+  fs["mat"] &gt;&gt; image;
+
+  cv::normalize(image, image, 0, 255, cv::NORM_MINMAX);
+  image.convertTo(image, CV_8U);
+
+  cv::imshow("image", image);
+  cv::waitKey();
+
+  return 0;
+}</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -528,7 +655,48 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="content">
 <img src="../PDI/Esteganografia/Escondida.jpg" alt="Imagem Resultado">
 </div>
-<div class="title">Figure 4. Resultado: bitplanes.cpp</div>
+<div class="title">Figure 4. Resultado: recover.cpp</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: recover.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main(int argc, char**argv) {
+  cv::Mat imagemPortadora, imagemEscondida, imagemInicial;
+  cv::Vec3b valPortadora, valEscondida, valInicial;
+  int nbits = 3;
+
+  imagemInicial = cv::imread(argv[1], cv::IMREAD_COLOR);
+
+  if (imagemInicial.empty()) {
+    std::cout &lt;&lt; "imagem nao carregou corretamente" &lt;&lt; std::endl;
+    return (-1);
+  }
+
+  imagemPortadora = imagemInicial.clone();
+  imagemEscondida = imagemInicial.clone();
+
+  for (int i = 0; i &lt; imagemInicial.rows; i++) {
+    for (int j = 0; j &lt; imagemInicial.cols; j++) {
+      valInicial = imagemInicial.at&lt;cv::Vec3b&gt;(i, j);
+      valPortadora[0] = valInicial[0] &gt;&gt; nbits &lt;&lt; nbits;
+      valPortadora[1] = valInicial[1] &gt;&gt; nbits &lt;&lt; nbits;
+      valPortadora[2] = valInicial[2] &gt;&gt; nbits &lt;&lt; nbits;
+      valEscondida[0] = valInicial[0] &lt;&lt; (8-nbits);
+      valEscondida[1] = valInicial[1] &lt;&lt; (8-nbits);
+      valEscondida[2] = valInicial[2] &lt;&lt; (8-nbits);
+      
+      imagemPortadora.at&lt;cv::Vec3b&gt;(i, j) = valPortadora;
+      imagemEscondida.at&lt;cv::Vec3b&gt;(i, j) = valEscondida;
+    }
+  }
+  imwrite("Portadora.jpg", imagemPortadora);
+  imwrite("Escondida.jpg", imagemEscondida);
+  return 0;
+}</code></pre>
+</div>
 </div>
 <div class="ulist">
 <ul>
@@ -554,7 +722,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="title">Figure 5. Resultado: bolhas.cpp</div>
 </div>
 <div class="listingblock">
-<div class="title">Programa: labeling.cpp</div>
+<div class="title">Programa: bolhas.cpp</div>
 <div class="content">
 <pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
 #include &lt;opencv2/opencv.hpp&gt;
@@ -657,28 +825,189 @@ int main(int, char**){
 </div>
 <div class="title">Figure 6. Resultado: equalize.cpp</div>
 </div>
+<div class="listingblock">
+<div class="title">Programa: equalize.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main(int argc, char** argv){
+    cv::Mat image;
+    int width, height;
+    cv::VideoCapture cap;
+    cv::Mat hist;
+    int nbins = 64;
+    float range[] = {0, 255};
+    const float *histrange = { range };
+    bool uniform = true;
+    bool accumulate = false;
+    int key;
+
+    cap.open(0);
+
+    if(!cap.isOpened()){
+        std::cout &lt;&lt; "Câmera indisponível";
+        return -1;
+    }
+
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+    width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+    height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+
+    std::cout &lt;&lt; "Largura = " &lt;&lt; width &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Altura  = " &lt;&lt; height &lt;&lt; std::endl;
+
+    int histw = nbins, histh = nbins/2;
+    cv::Mat histImg(histh, histw, CV_8UC3, cv::Scalar(0,0,0));
+
+    while(1){
+        cap &gt;&gt; image;
+        cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
+        cv::calcHist(&amp;image, 1, 0, cv::Mat(), hist, 1,
+                     &amp;nbins, &amp;histrange,
+                     uniform, accumulate);
+
+        cv::normalize(hist, hist, 0, histImg.rows, cv::NORM_MINMAX, -1, cv::Mat());
+
+        histImg.setTo(cv::Scalar(0));
+        
+        cv::Mat eqImg;
+        cv::equalizeHist(image, eqImg);
+        
+        for(int i=0; i&lt;nbins/2; i++){
+            for(int j=0; j&lt;nbins; j++){
+               image.at&lt;uchar&gt;(i,j) = 0;
+           }
+        }
+
+        for(int i=0; i&lt;nbins; i++){
+            cv::line(image,
+                     cv::Point(i, histh),
+                     cv::Point(i, histh-cvRound(hist.at&lt;float&gt;(i))),
+                     cv::Scalar(255, 255, 255), 1, 8, 0);
+        }
+        
+        cv::calcHist(&amp;eqImg, 1, 0, cv::Mat(), hist, 1,
+                     &amp;nbins, &amp;histrange,
+                     uniform, accumulate);
+        cv::normalize(hist, hist, 0, histImg.rows, cv::NORM_MINMAX, -1, cv::Mat());
+        
+        for(int i=0; i&lt;nbins/2; i++){
+            for(int j=0; j&lt;nbins; j++){
+               eqImg.at&lt;uchar&gt;(i,j) = 0;
+           }
+        }
+
+        for(int i=0; i&lt;nbins; i++){
+            cv::line(eqImg,
+                     cv::Point(i, histh),
+                     cv::Point(i, histh-cvRound(hist.at&lt;float&gt;(i))),
+                     cv::Scalar(255, 255, 255), 1, 8, 0);
+        }
+
+        cv::Mat concImg;
+        cv::hconcat(image, eqImg, concImg);
+        cv::imshow("image", concImg);
+        key = cv::waitKey(30);
+        if(key == 27) break;
+    }
+    return 0;
+}</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
 <p>5.2 Implemente um programa motiondetector.cpp. Este deverá continuamente calcular o histograma da imagem (apenas uma componente de cor é suficiente) e compará-lo com o último histograma calculado. Quando a diferença entre estes ultrapassar um limiar pré-estabelecido, ative um alarme. Utilize uma função de comparação que julgar conveniente.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Programa: motiondetector.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main() {
+    int nbins = 64;
+    const float range[] = {0, 255};
+    const float* histrange[] = { range };
+    bool uniform = true;
+    bool accumulate = false;
+    int key;
+
+    cv::VideoCapture cap(0);
+
+    if (!cap.isOpened()) {
+        std::cout &lt;&lt; "Câmera indisponível";
+        return -1;
+    }
+
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+    double width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+    double height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+
+    std::cout &lt;&lt; "largura = " &lt;&lt; width &lt;&lt; std::endl;
+    std::cout &lt;&lt; "altura  = " &lt;&lt; height &lt;&lt; std::endl;
+
+    cv::Mat image, histImgR, histImgG, histImgB;
+    std::vector&lt;cv::Mat&gt; planes(3);
+    cv::Mat histR, histG, histB, past;
+
+    int cont = 0, histw = nbins, histh = nbins / 2;
+
+    while (true) {
+        cap &gt;&gt; image;
+        if (image.empty())
+            break;
+
+        cv::split(image, planes);
+
+        
+        cv::calcHist(&amp;planes[2], 1, 0, cv::Mat(), histR, 1, &amp;nbins, histrange, uniform, accumulate);
+        cv::normalize(histR, histR, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+
+        cv::imshow("image", image);
+
+        char key = cv::waitKey(30);
+        if (key == 27)
+            break;
+
+        
+        if (!past.empty()) {
+            double correl = cv::compareHist(histR, past, cv::HISTCMP_CORREL);
+
+            if (correl &lt; 0.8) {
+                std::cout &lt;&lt; "MOVIMENTO DETECTADO!!!" &lt;&lt; std::endl;
+            }
+        }
+
+        
+        past = histR.clone();
+    }
+
+    return 0;
+}</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
 <p>Exercicio 6</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>Implemente um programa laplgauss.cpp. O programa deverá acrescentar permitir que seja calculado o laplaciano do gaussiano das imagens capturadas. Compare o resultado desse filtro com a simples aplicação do filtro laplaciano.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Exercicio 7</p>
+<p>Implemente um programa laplgauss.cpp. O programa deverá acrescentar permitir que seja calculado o laplaciano do gaussiano das imagens capturadas. Compare o resultado desse filtro com a simples aplicação do filtro laplaciano.</p>
 </li>
 </ul>
 </div>
 </li>
+<li>
+<p>Exercicio 7</p>
+<div class="ulist">
+<ul>
 <li>
 <p>7.1 Implemente um programa tiltshift.cpp. Três ajustes deverão ser providos na tela da interface:</p>
 <div class="ulist">
@@ -700,12 +1029,15 @@ int main(int, char**){
 </li>
 </ul>
 </div>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-04-12 13:46:04 -0300
+Last updated 2024-04-12 14:06:31 -0300
 </div>
 </div>
 </body>
