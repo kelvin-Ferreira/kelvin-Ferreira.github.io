@@ -450,7 +450,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Pagina dedicada a apresentar as resoluções das atividades propostas na turma de Processamento Digital de Imagens (DCA0445) de 2024.1 da UFRN.</p>
 <p>Repositório da matéria no <a href="https://github.com/kelvin-Ferreira/PDI.git">GitHub</a>.</p>
 </div>
 </div>
@@ -550,9 +549,93 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="PDI/Bolhas/resultado.png" alt="Imagem Resultado">
+<img src="../PDI/Bolhas/resultado.png" alt="Imagem Resultado">
 </div>
 <div class="title">Figure 5. Resultado: bolhas.cpp</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: labeling.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main(int, char**){
+  cv::Mat image;
+  cv::Vec3b val;
+
+  image= cv::imread("bolhas.png",cv::IMREAD_GRAYSCALE);
+  if(!image.data)
+    std::cout &lt;&lt; "nao abriu bolhas.png" &lt;&lt; std::endl;
+
+  cv::namedWindow("Bolhas", cv::WINDOW_AUTOSIZE);
+  
+  cv::imshow("Bolhas", image);  
+  cv::waitKey();
+  
+  int h, w, cont1=0, cont2=0;
+  h = image.rows;
+  w = image.cols;
+  cv:: Point p;
+  
+  for(int i=0; i &lt; w; i++){
+     image.at&lt;uchar&gt;(0,i)=255;
+  }
+  
+  for(int i = 0; i &lt; w; i++){
+     image.at&lt;uchar&gt;(h-1,i)=255;
+  }
+  
+  for(int i=0; i &lt; w; i++){
+     image.at&lt;uchar&gt;(i,0)=255;
+  }
+  
+  for(int i = 0; i &lt; w; i++){
+     image.at&lt;uchar&gt;(i,w-1)=255;
+  }
+  
+  p.x = 0;
+  p.y = 0;
+  cv::floodFill(image, p, 0);
+  cv::floodFill(image, p, 1);
+  
+  for (int i = 0; i &lt; h; i++) {
+    for (int j = 0; j &lt; w; j++) {
+      if (image.at&lt;uchar&gt;(i, j) == 255) {
+        cont1++;
+        p.x = j;
+        p.y = i;
+        cv::floodFill(image, p, 254);
+        }
+      if (image.at&lt;uchar&gt;(i, j) == 0) {
+        if(image.at&lt;uchar&gt;(i, j-1) == 254){
+          p.x = j-1;
+          p.y = i;
+          cv::floodFill(image, p, 150);
+          cont2++;
+          p.x = j;
+          p.y = i;
+          cv::floodFill(image, p, 1);
+        }else{
+             if(image.at&lt;uchar&gt;(i, j-1) == 150){
+             p.x = j;
+             p.y = i;
+             cv::floodFill(image, p, 1);
+             }
+          }
+        }
+      }
+    }
+  
+  std::cout &lt;&lt; "Total de Bolhas: " &lt;&lt; cont1 &lt;&lt; "\n";
+  std::cout &lt;&lt; "Bolhas sem Furos: " &lt;&lt; cont1-cont2 &lt;&lt; "\n";
+  std::cout &lt;&lt; "Bolhas com Furos: " &lt;&lt; cont2 &lt;&lt; "\n";
+  imwrite("resultado.png", image);
+  cv::imshow("Bolhas", image);  
+  cv::waitKey();
+
+  return 0;
+}</code></pre>
+</div>
 </div>
 <div class="ulist">
 <ul>
@@ -622,7 +705,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-04-08 21:11:46 -0300
+Last updated 2024-04-12 13:46:04 -0300
 </div>
 </div>
 </body>
