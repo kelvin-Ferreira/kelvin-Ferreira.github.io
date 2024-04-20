@@ -590,6 +590,13 @@ int main(int, char**) {
 </div>
 <div class="title">Figure 3. Resultado: senoide.cpp</div>
 </div>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>A diferença que obtemos ao comparar as linhas da imagem em ambos os formatos acontece pois ao ser gravada no formato PNG os valores da imagem são truncados pois os valores dos pixels de uma imagem neste formato são gravados como inteiros.</p>
+</li>
+</ol>
+</div>
 <div class="listingblock">
 <div class="title">Programa: senoide.cpp</div>
 <div class="content">
@@ -706,6 +713,13 @@ int main(int argc, char**argv) {
 <ul>
 <li>
 <p>4.1 Observando-se o programa labeling.cpp como exemplo, é possível verificar que caso existam mais de 255 objetos na cena, o processo de rotulação poderá ficar comprometido, visto que o tipo de dado usado para suportar imagens cinzentas permitem armazenar apenas um byte por pixel. Identifique a situação em que isso ocorre e proponha uma solução para este problema.</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Para resolver este problema podesmos converter a imagem para escala de cores RGB oque nos daria a possibilidade de marcação de 255³ objetos numa cena.</p>
+</li>
+</ol>
+</div>
 </li>
 <li>
 <p>4.2 Aprimore o algoritmo de contagem apresentado para identificar regiões com ou sem buracos internos que existam na cena. Assuma que objetos com mais de um buraco podem existir. Inclua suporte no seu algoritmo para não contar bolhas que tocam as bordas da imagem. Não se pode presumir, a priori, que elas tenham buracos ou não.</p>
@@ -1171,7 +1185,7 @@ int main(int, char **) {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-04-12 15:19:05 -0300
+Last updated 2024-04-20 18:38:41 -0300
 </div>
 </div>
 </body>
