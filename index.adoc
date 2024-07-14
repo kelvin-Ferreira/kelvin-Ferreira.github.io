@@ -3,144 +3,427 @@ Kelvin Ferreira <kelvin.costa.339@ufrn.edu.br>
 
 Repositório da matéria no https://github.com/kelvin-Ferreira/PDI.git[GitHub].
 
-== Unidade I
+== Unidade II
 
-* Exercicio 1 
-** 1.1 Implemente um programa regions.cpp. Esse programa deverá solicitar ao usuário as coordenadas de dois pontos P1 e P2 localizados dentro dos limites do tamanho da imagem e exibir que lhe for fornecida. Entretanto, a região definida pelo retângulo de vértices opostos definidos pelos pontos P1 e P2 será exibida com o negativo da imagem na região correspondente.
+* Exercicio 8 
+** 8.1 Utilizando os programa exemplos/dft.cpp, calcule e apresente o espectro de magnitude da imagem, “Imagem senoidal com 256x256 pixels”.
 
-.Resultado: regions.cpp
-image::../PDI/Regions/resultado.png[Imagem Resultado]
+.Resultado: dft.cpp
+image::../PDI/dft/resultado.png[Imagem Resultado]
 
-** 1.2 Implemente um programa trocaregioes.cpp. Seu programa deverá trocar os quadrantes em diagonal na imagem. Explore o uso da classe cv::Mat e seus construtores para criar as regiões que serão trocadas. Assuma que a imagem de entrada tem dimensões múltiplas de 2 para facilitar a implementação do processo de troca.
+** 8.2 Compare o espectro de magnitude gerado para a figura, “Imagem senoidal com 256x256 pixels” com o valor teórico da transformada de Fourier da senóide.
 
-.Resultado: trocaregioes.cpp
-image::../PDI/Swap/resultado.png[Imagem Resultado]
+... Segundo o valor teórico da TF da senoide cuja magnitude equivale a |X(f)∣=2A​[δ(f−f0​)+δ(f+f0​)], concluimos que o espectro de magnitude apresenta-se dois picos em f0 e -f0, comparando com o resultado obtido podemos observar que o resultado que obtemos é bem diferente, apresentando um espectro de magnitudes com multiplos picos.
 
-* Exercicio 2 
+** 8.3 Usando agora o filestorage.cpp, “filestorage.cpp” como referência, adapte o programa exemplos/dft.cpp para ler a imagem em ponto flutuante armazenada no arquivo YAML equivalente (ilustrado na Listagem 18, “trecho do arquivo senoide-256.yml”).
 
-** Crie um programa que gere uma imagem de dimensões 256x256 pixels contendo uma senóide de 4 períodos com amplitude igual 127 desenhada na horizontal. Grave a imagem no formato YML e também exporte no formato PNG. Compare os arquivos gerados, extraindo uma linha correspondente de cada imagem gravada e comparando a diferença entre elas. Trace um gráfico da diferença calculada ao longo da linha correspondente extraída nas imagens. O que você observa? Por que isso acontece?
+.Resultado: dft2.cpp
+image::../PDI/dft2/resultado.png[Imagem Resultado]
 
-.Resultado: senoide.cpp
-image::../PDI/Senoide/resultado.png[Imagem Resultado]
-
-* Exercicio 3
-** Escreva um programa que recupere a imagem codificada de uma imagem resultante de esteganografia. Lembre-se que os bits menos significativos dos pixels da imagem fornecida deverão compor os bits mais significativos dos pixels da imagem recuperada. O programa deve receber como parâmetros de linha de comando o nome da imagem resultante da esteganografia. 
-
-.Resultado: bitplanes.cpp
-image::../PDI/Esteganografia/Escondida.jpg[Imagem Resultado]
-
-* Exercicio 4
-** 4.1 Observando-se o programa labeling.cpp como exemplo, é possível verificar que caso existam mais de 255 objetos na cena, o processo de rotulação poderá ficar comprometido, visto que o tipo de dado usado para suportar imagens cinzentas permitem armazenar apenas um byte por pixel. Identifique a situação em que isso ocorre e proponha uma solução para este problema.
-
-** 4.2 Aprimore o algoritmo de contagem apresentado para identificar regiões com ou sem buracos internos que existam na cena. Assuma que objetos com mais de um buraco podem existir. Inclua suporte no seu algoritmo para não contar bolhas que tocam as bordas da imagem. Não se pode presumir, a priori, que elas tenham buracos ou não.
-
-.Resultado: bolhas.cpp
-image::../PDI/Bolhas/resultado.png[Imagem Resultado]
-
-* Exercicio 5
-** 5.1 Implemente um programa equalize.cpp. Este deverá, para cada imagem capturada, realizar a equalização do histogram antes de exibir a imagem. Teste sua implementação apontando a câmera para ambientes com iluminações variadas e observando o efeito gerado. Assuma que as imagens processadas serão em tons de cinza.
-
-.Resultado: equalize.cpp
-image::../PDI/Equalize/resultado.png[Imagem Resultado]
-
-** 5.2 Implemente um programa motiondetector.cpp. Este deverá continuamente calcular o histograma da imagem (apenas uma componente de cor é suficiente) e compará-lo com o último histograma calculado. Quando a diferença entre estes ultrapassar um limiar pré-estabelecido, ative um alarme. Utilize uma função de comparação que julgar conveniente.
-
-
-
-* Exercicio 6 
-** Implemente um programa laplgauss.cpp. O programa deverá acrescentar permitir que seja calculado o laplaciano do gaussiano das imagens capturadas. Compare o resultado desse filtro com a simples aplicação do filtro laplaciano.
-
-* Exercicio 7
-** 7.1 Implemente um programa tiltshift.cpp. Três ajustes deverão ser providos na tela da interface:
-
-*** um ajuste para regular a altura da região central que entrará em foco;
-
-*** um ajuste para regular a força de decaimento da região borrada;
-
-*** um ajuste para regular a posição vertical do centro da região que entrará em foco. Finalizado o programa, a imagem produzida deverá ser salva em arquivo.
-
-** 7.2 Implemente um programa tiltshiftvideo.cpp. Tal programa deverá ser capaz de processar um arquivo de vídeo, produzir o efeito de tilt-shift nos quadros presentes e escrever o resultado em outro arquivo de vídeo. A ideia é criar um efeito de miniaturização de cenas. Descarte quadros em uma taxa que julgar conveniente para evidenciar o efeito de stop motion, comum em vídeos desse tipo.
-
-[source, cpp]
+.Programa: dft2.cpp
+[source,cpp]
 ----
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <vector>
 
-int main(int, char**){
-  cv::Mat image;
-  cv::Vec3b val;
+void swapQuadrants(cv::Mat& image) {
+    cv::Mat tmp, A, B, C, D;
 
-  image= cv::imread("bolhas.png",cv::IMREAD_GRAYSCALE);
-  if(!image.data)
-    std::cout << "nao abriu bolhas.png" << std::endl;
+    image = image(cv::Rect(0, 0, image.cols & -2, image.rows & -2));
 
-  cv::namedWindow("Bolhas", cv::WINDOW_AUTOSIZE);
-  
-  cv::imshow("Bolhas", image);  
+    int centerX = image.cols / 2;
+    int centerY = image.rows / 2;
+
+    A = image(cv::Rect(0, 0, centerX, centerY));
+    B = image(cv::Rect(centerX, 0, centerX, centerY));
+    C = image(cv::Rect(0, centerY, centerX, centerY));
+    D = image(cv::Rect(centerX, centerY, centerX, centerY));
+
+    A.copyTo(tmp);
+    D.copyTo(A);
+    tmp.copyTo(D);
+
+    C.copyTo(tmp);
+    B.copyTo(C);
+    tmp.copyTo(B);
+}
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cout << "Uso: " << argv[0] << " <arquivo.yml>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    cv::Mat image, padded, complexImage;
+    std::vector<cv::Mat> planos;
+
+    cv::FileStorage fs(argv[1], cv::FileStorage::READ);
+    if (!fs.isOpened()) {
+        std::cout << "Erro abrindo arquivo " << argv[1] << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    fs["mat"] >> image; 
+    fs.release();
+
+    if (image.empty()) {
+        std::cout << "Erro: imagem vazia no arquivo " << argv[1] << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::cout << "Imagem carregada com sucesso: " << image.size() << std::endl;
+
+    int dft_M = cv::getOptimalDFTSize(image.rows);
+    int dft_N = cv::getOptimalDFTSize(image.cols);
+    cv::copyMakeBorder(image, padded, 0, dft_M - image.rows, 0,
+                       dft_N - image.cols, cv::BORDER_CONSTANT,
+                       cv::Scalar::all(0));
+
+    planos.push_back(cv::Mat_<float>(padded));
+
+    planos.push_back(cv::Mat::zeros(padded.size(), CV_32F));
+
+    cv::merge(planos, complexImage);
+
+    cv::dft(complexImage, complexImage);
+    swapQuadrants(complexImage);
+
+    cv::split(complexImage, planos);
+
+    cv::Mat magn, fase;
+    cv::cartToPolar(planos[0], planos[1], magn, fase, false);
+    cv::normalize(fase, fase, 0, 1, cv::NORM_MINMAX);
+
+    cv::magnitude(planos[0], planos[1], magn);
+
+    magn += cv::Scalar::all(1);
+
+    cv::log(magn, magn);
+    cv::normalize(magn, magn, 0, 1, cv::NORM_MINMAX);
+
+    cv::imshow("Espectro de magnitude", magn);
+    cv::imshow("Espectro de fase", fase);
+
+    cv::waitKey();
+    return EXIT_SUCCESS;
+}
+
+----
+
+** 8.4 Compare o novo espectro de magnitude gerado com o valor teórico da transformada de Fourier da senóide. O que mudou para que o espectro de magnitude gerado agora esteja mais próximo do valor teórico? Porque isso aconteceu?
+
+... Podemos observar que o resultado obtido a partir do arquivo YAML aproxima-se bem mais do resultado esperado , em comparação ao arquivo PNG, poque provavelmente acontesse devido aos tipos de valores com que cada formato trabalha ja que o formato PNG trabalha com valore inteiros truncando os valores fornecidos pela senoide, oque causa perdas de informação, ja o YAML armazena informação em ponto flutuante, diminuindo as perdas ao processar a informação.
+
+* Exercicio 9 
+
+** Utilizando o programa exemplos/dftfilter.cpp como referência, implemente o filtro homomórfico para melhorar imagens com iluminação irregular. Crie uma cena mal iluminada e ajuste os parâmetros do filtro homomórfico para corrigir a iluminação da melhor forma possível. Assuma que a imagem fornecida é em tons de cinza.
+
+.Imagem original:
+image::../PDI/dftfilter/image.png[Imagem Original]
+
+.Resultado: dftfilter.cpp
+image::../PDI/dftfilter/dft-filter.png[Imagem Resultado]
+
+.Programa: dftfilter.cpp
+[source,cpp]
+----
+#include <iostream>
+#include <vector>
+#include <opencv2/opencv.hpp>
+
+void swapQuadrants(cv::Mat& image) {
+  cv::Mat tmp, A, B, C, D;
+
+  // se a imagem tiver tamanho impar, recorta a regiao para o maior
+  // tamanho par possivel (-2 = 1111...1110)
+  image = image(cv::Rect(0, 0, image.cols & -2, image.rows & -2));
+
+  int centerX = image.cols / 2;
+  int centerY = image.rows / 2;
+
+  // rearranja os quadrantes da transformada de Fourier de forma que 
+  // a origem fique no centro da imagem
+  // A B   ->  D C
+  // C D       B A
+  A = image(cv::Rect(0, 0, centerX, centerY));
+  B = image(cv::Rect(centerX, 0, centerX, centerY));
+  C = image(cv::Rect(0, centerY, centerX, centerY));
+  D = image(cv::Rect(centerX, centerY, centerX, centerY));
+
+  // swap quadrants (Top-Left with Bottom-Right)
+  A.copyTo(tmp);
+  D.copyTo(A);
+  tmp.copyTo(D);
+
+  // swap quadrant (Top-Right with Bottom-Left)
+  C.copyTo(tmp);
+  B.copyTo(C);
+  tmp.copyTo(B);
+}
+
+void makeHomomorphicFilter(const cv::Mat &image, cv::Mat &filter, double gammaL, double gammaH, double d0, double c) {
+  cv::Mat_<float> filter2D(image.rows, image.cols);
+  int centerX = image.cols / 2;
+  int centerY = image.rows / 2;
+
+  for (int i = 0; i < image.rows; i++) {
+    for (int j = 0; j < image.cols; j++) {
+      double d = sqrt(pow(i - centerY, 2) + pow(j - centerX, 2));
+      double H = (gammaH - gammaL) * (1.0 - exp(-c * (d * d) / (d0 * d0))) + gammaL;
+      filter2D.at<float>(i, j) = static_cast<float>(H);
+    }
+  }
+
+  cv::Mat planes[] = {filter2D, cv::Mat::zeros(filter2D.size(), CV_32F)};
+  cv::merge(planes, 2, filter);
+}
+
+int main(int argc, char** argv) {
+  cv::Mat image, padded, complexImage;
+  std::vector<cv::Mat> planos; 
+
+  image = imread(argv[1], cv::IMREAD_GRAYSCALE);
+  if (image.empty()) {
+    std::cout << "Erro abrindo imagem " << argv[1] << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // expande a imagem de entrada para o melhor tamanho no qual a DFT pode ser
+  // executada, preenchendo com zeros a lateral inferior direita.
+  int dft_M = cv::getOptimalDFTSize(image.rows);
+  int dft_N = cv::getOptimalDFTSize(image.cols); 
+  cv::copyMakeBorder(image, padded, 0, dft_M - image.rows, 0, dft_N - image.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+
+  // prepara a matriz complexa para ser preenchida
+  // primeiro a parte real, contendo a imagem de entrada
+  planos.push_back(cv::Mat_<float>(padded)); 
+  // depois a parte imaginaria com valores nulos
+  planos.push_back(cv::Mat::zeros(padded.size(), CV_32F));
+
+  // combina os planos em uma unica estrutura de dados complexa
+  cv::merge(planos, complexImage);  
+
+  // calcula a DFT
+  cv::dft(complexImage, complexImage); 
+  swapQuadrants(complexImage);
+
+  // cria o filtro homomórfico e aplica a filtragem de frequencia
+  cv::Mat filter;
+  double gammaL = 0.5, gammaH = 2.0, d0 = 30.0, c = 1.0;
+  makeHomomorphicFilter(complexImage, filter, gammaL, gammaH, d0, c);
+  cv::mulSpectrums(complexImage, filter, complexImage, 0);
+
+  // calcula a DFT inversa
+  swapQuadrants(complexImage);
+  cv::idft(complexImage, complexImage);
+
+  // planos[0] : Re(DFT(image)
+  // planos[1] : Im(DFT(image)
+  cv::split(complexImage, planos);
+
+  // recorta a imagem filtrada para o tamanho original
+  // selecionando a regiao de interesse (roi)
+  cv::Rect roi(0, 0, image.cols, image.rows);
+  cv::Mat result = planos[0](roi);
+
+  // normaliza a parte real para exibicao
+  cv::normalize(result, result, 0, 1, cv::NORM_MINMAX);
+
+  cv::imshow("image", result);
+  cv::imwrite("dft-filter.png", result * 255);
+
   cv::waitKey();
-  
-  int h, w, cont1=0, cont2=0;
-  h = image.rows;
-  w = image.cols;
-  cv:: Point p;
-  
-  for(int i=0; i < w; i++){
-     image.at<uchar>(0,i)=255;
+  return EXIT_SUCCESS;
+}
+----
+
+* Exercicio 10
+** Utilizando os programas exemplos/canny.cpp e exemplos/pontilhismo.cpp como referência, implemente um programa cannypoints.cpp. A idéia é usar as bordas produzidas pelo algoritmo de Canny para melhorar a qualidade da imagem pontilhista gerada. A forma como a informação de borda será usada é livre. Entretanto, são apresentadas algumas sugestões de técnicas que poderiam ser utilizadas:
+
+*** Desenhar pontos grandes na imagem pontilhista básica;
+
+*** Usar a posição dos pixels de borda encontrados pelo algoritmo de Canny para desenhar pontos nos respectivos locais na imagem gerada.
+
+*** Experimente ir aumentando os limiares do algoritmo de Canny e, para cada novo par de limiares, desenhar círculos cada vez menores nas posições encontradas. A Figura 48, “Pontilhismo aplicado à imagem Lena” foi desenvolvida usando essa técnica.
+
+** Escolha uma imagem de seu gosto e aplique a técnica que você desenvolveu.
+
+** Descreva no seu relatório detalhes do procedimento usado para criar sua técnica pontilhista.
+
+... O Programa foi modificado de forma que agora receba como parametro, alem da imagem que desejamos criar o pontilhismo, tambem o resultado da imagem desejada submetida ao algoritimo de Canny (Programa canny.cpp), a partir então das informações deste novo parametro, o programa modifica o raio dos pontos (Dobra o tamanho) aos quais o centro coinside com o a bordas detectadas pelo metodo de canny.
+
+.Imagem original:
+image::../PDI/pontilhismo/imagem.png[Imagem Original]
+
+.Resultado: ponti.cpp (Sem fazer uso do algoritimo de canny)
+image::../PDI/pontilhismo/simples.jpg[Imagem Sem Canny]
+
+.Resultado: ponti.cpp (Utilizando do algoritimo de canny)
+image::../PDI/pontilhismo/pontos.jpg[Imagem Resultado]
+
+.Programa: pontiCanny.cpp
+[source,cpp]
+----
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <numeric>
+#include <opencv2/opencv.hpp>
+#include <vector>
+#include <chrono>
+#include <random>
+
+#define STEP 5
+#define JITTER 3
+#define RAIO 3
+#define RAIO2 6
+
+int main(int argc, char** argv) {
+  std::vector<int> yrange;
+  std::vector<int> xrange;
+
+  cv::Mat image, cannyImg, frame, points;
+
+  int width, height, gray;
+  int x, y;
+
+  image = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
+  cannyImg = cv::imread(argv[2], cv::IMREAD_GRAYSCALE);
+
+  std::srand(std::time(0));
+
+  if (image.empty()) {
+    std::cout << "Could not open or find the image" << std::endl;
+    return -1;
   }
-  
-  for(int i = 0; i < w; i++){
-     image.at<uchar>(h-1,i)=255;
+
+  width = image.cols;
+  height = image.rows;
+
+  xrange.resize(height / STEP);
+  yrange.resize(width / STEP);
+
+  std::iota(xrange.begin(), xrange.end(), 0);
+  std::iota(yrange.begin(), yrange.end(), 0);
+
+  for (uint i = 0; i < xrange.size(); i++) {
+    xrange[i] = xrange[i] * STEP + STEP / 2;
   }
-  
-  for(int i=0; i < w; i++){
-     image.at<uchar>(i,0)=255;
+
+  for (uint i = 0; i < yrange.size(); i++) {
+    yrange[i] = yrange[i] * STEP + STEP / 2;
   }
-  
-  for(int i = 0; i < w; i++){
-     image.at<uchar>(i,w-1)=255;
-  }
-  
-  p.x = 0;
-  p.y = 0;
-  cv::floodFill(image, p, 0);
-  cv::floodFill(image, p, 1);
-  
-  for (int i = 0; i < h; i++) {
-    for (int j = 0; j < w; j++) {
-      if (image.at<uchar>(i, j) == 255) {
-        cont1++;
-        p.x = j;
-        p.y = i;
-        cv::floodFill(image, p, 254);
-        }
-      if (image.at<uchar>(i, j) == 0) {
-        if(image.at<uchar>(i, j-1) == 254){
-          p.x = j-1;
-          p.y = i;
-          cv::floodFill(image, p, 150);
-          cont2++;
-          p.x = j;
-          p.y = i;
-          cv::floodFill(image, p, 1);
-        }else{
-             if(image.at<uchar>(i, j-1) == 150){
-             p.x = j;
-             p.y = i;
-             cv::floodFill(image, p, 1);
-             }
-          }
-        }
+
+  points = cv::Mat(height, width, CV_8U, cv::Scalar(255));
+
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::shuffle(xrange.begin(), xrange.end(), std::default_random_engine(seed));
+
+  for (auto i : xrange) {
+  std::shuffle(yrange.begin(), yrange.end(), std::default_random_engine(seed));
+    for (auto j : yrange) {
+      x = i + std::rand() % (2 * JITTER) - JITTER + 1;
+      y = j + std::rand() % (2 * JITTER) - JITTER + 1;
+      gray = image.at<uchar>(x, y);
+      if(cannyImg.at<uchar>(x, y) != 255){
+        cv::circle(points, cv::Point(y, x), RAIO, CV_RGB(gray, gray, gray),
+        cv::FILLED, cv::LINE_AA);
+      }else{
+        cv::circle(points, cv::Point(y, x), RAIO2, CV_RGB(gray, gray, gray),
+        cv::FILLED, cv::LINE_AA);
       }
     }
-  
-  std::cout << "Total de Bolhas: " << cont1 << "\n";
-  std::cout << "Bolhas sem Furos: " << cont1-cont2 << "\n";
-  std::cout << "Bolhas com Furos: " << cont2 << "\n";
-  imwrite("resultado.png", image);
-  cv::imshow("Bolhas", image);  
-  cv::waitKey();
-
+  }
+  cv::imwrite("pontos.jpg", points);
   return 0;
 }
 ----
 
+
+* Exercicio 11
+** Utilizando o programa kmeans.cpp como exemplo prepare um programa exemplo onde a execução do código se dê usando o parâmetro nRodadas=1 e inciar os centros de forma aleatória usando o parâmetro KMEANS_RANDOM_CENTERS ao invés de KMEANS_PP_CENTERS. Realize 10 rodadas diferentes do algoritmo e compare as imagens produzidas. Explique porque elas podem diferir tanto.
+
+.Resultado 1: kmeans.cpp
+image::../PDI/Bolhas/kmeans0.jpg[Imagem Resultado 1]
+
+.Resultado 2: kmeans.cpp
+image::../PDI/Bolhas/kmeans1.jpg[Imagem Resultado 2]
+
+.Resultado 3: kmeans.cpp
+image::../PDI/Bolhas/kmeans2.jpg[Imagem Resultado 3]
+
+.Resultado 4: kmeans.cpp
+image::../PDI/Bolhas/kmeans3.jpg[Imagem Resultado 4]
+
+.Resultado 5: kmeans.cpp
+image::../PDI/Bolhas/kmeans4.jpg[Imagem Resultado 5]
+
+.Resultado 6: kmeans.cpp
+image::../PDI/Bolhas/kmeans5.jpg[Imagem Resultado 6]
+
+.Resultado 7: kmeans.cpp
+image::../PDI/Bolhas/kmeans6.jpg[Imagem Resultado 7]
+
+.Resultado 8: kmeans.cpp
+image::../PDI/Bolhas/kmeans7.jpg[Imagem Resultado 8]
+
+.Resultado 9: kmeans.cpp
+image::../PDI/Bolhas/kmeans8.jpg[Imagem Resultado 9]
+
+.Resultado 10: kmeans.cpp
+image::../PDI/Bolhas/kmeans9.jpg[Imagem Resultado 10]
+
+.Programa: kmeans.cpp
+[source,cpp]
+----
+#include <cstdlib>
+#include <opencv2/opencv.hpp>
+
+int main(int argc, char** argv) {
+  int nClusters = 8, nRodadas = 1, rp = 0;
+
+  cv::Mat rotulos, centros;
+
+  if (argc != 3) {
+    std::cout << "kmeans entrada.jpg saida.jpg\n";
+    exit(0);
+  }
+for(rp = 0; rp<10; rp++){
+  cv::Mat img = cv::imread(argv[1], cv::IMREAD_COLOR);
+  cv::Mat samples(img.rows * img.cols, 3, CV_32F);
+
+  for (int y = 0; y < img.rows; y++) {
+    for (int x = 0; x < img.cols; x++) {
+      for (int z = 0; z < 3; z++) {
+        samples.at<float>(y + x * img.rows, z) = img.at<cv::Vec3b>(y, x)[z];
+      }
+    }
+  }
+
+  cv::kmeans(samples, nClusters, rotulos, cv::TermCriteria(cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 10000, 0.0001), nRodadas, cv::KMEANS_RANDOM_CENTERS, centros);
+
+  cv::Mat rotulada(img.size(), img.type());
+  for (int y = 0; y < img.rows; y++) {
+    for (int x = 0; x < img.cols; x++) {
+      int indice = rotulos.at<int>(y + x * img.rows, 0);
+      rotulada.at<cv::Vec3b>(y, x)[0] = (uchar)centros.at<float>(indice, 0);
+      rotulada.at<cv::Vec3b>(y, x)[1] = (uchar)centros.at<float>(indice, 1);
+      rotulada.at<cv::Vec3b>(y, x)[2] = (uchar)centros.at<float>(indice, 2);
+    }
+  }
+  cv::imshow("kmeans", rotulada);
+  cv::imwrite("kmeans"+ std::to_string(rp)+ ".jpg", rotulada);
+  cv::waitKey();
+  }
+}
+
+----
+
+... A diferença notavel entre as imagens acontece pois, ao aleatorizar os centros (mudando a posição de partida) leva o metodo a encontrar distintos caminhos de convergencia, e por sua vez a resultados diferentes.
