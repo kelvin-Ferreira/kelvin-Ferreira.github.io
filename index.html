@@ -1181,11 +1181,566 @@ int main(int, char **) {
 </ul>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_unidade_ii">Unidade II</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Exercicio 8</p>
+<div class="ulist">
+<ul>
+<li>
+<p>8.1 Utilizando os programa exemplos/dft.cpp, calcule e apresente o espectro de magnitude da imagem, “Imagem senoidal com 256x256 pixels”.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/dft/resultado.png" alt="Imagem Resultado">
+</div>
+<div class="title">Figure 1. Resultado: dft.cpp</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>8.2 Compare o espectro de magnitude gerado para a figura, “Imagem senoidal com 256x256 pixels” com o valor teórico da transformada de Fourier da senóide.</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Segundo o valor teórico da TF da senoide cuja magnitude equivale a |X(f)∣=2A​[δ(f−f0​)+δ(f+f0​)], concluimos que o espectro de magnitude apresenta-se dois picos em f0 e -f0, comparando com o resultado obtido podemos observar que o resultado que obtemos é bem diferente, apresentando um espectro de magnitudes com multiplos picos.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>8.3 Usando agora o filestorage.cpp, “filestorage.cpp” como referência, adapte o programa exemplos/dft.cpp para ler a imagem em ponto flutuante armazenada no arquivo YAML equivalente (ilustrado na Listagem 18, “trecho do arquivo senoide-256.yml”).</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/dft2/resultado.png" alt="Imagem Resultado">
+</div>
+<div class="title">Figure 2. Resultado: dft2.cpp</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: dft2.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;opencv2/core.hpp&gt;
+#include &lt;opencv2/highgui.hpp&gt;
+#include &lt;opencv2/imgproc.hpp&gt;
+#include &lt;vector&gt;
+
+void swapQuadrants(cv::Mat&amp; image) {
+    cv::Mat tmp, A, B, C, D;
+
+    image = image(cv::Rect(0, 0, image.cols &amp; -2, image.rows &amp; -2));
+
+    int centerX = image.cols / 2;
+    int centerY = image.rows / 2;
+
+    A = image(cv::Rect(0, 0, centerX, centerY));
+    B = image(cv::Rect(centerX, 0, centerX, centerY));
+    C = image(cv::Rect(0, centerY, centerX, centerY));
+    D = image(cv::Rect(centerX, centerY, centerX, centerY));
+
+    A.copyTo(tmp);
+    D.copyTo(A);
+    tmp.copyTo(D);
+
+    C.copyTo(tmp);
+    B.copyTo(C);
+    tmp.copyTo(B);
+}
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cout &lt;&lt; "Uso: " &lt;&lt; argv[0] &lt;&lt; " &lt;arquivo.yml&gt;" &lt;&lt; std::endl;
+        return EXIT_FAILURE;
+    }
+
+    cv::Mat image, padded, complexImage;
+    std::vector&lt;cv::Mat&gt; planos;
+
+    cv::FileStorage fs(argv[1], cv::FileStorage::READ);
+    if (!fs.isOpened()) {
+        std::cout &lt;&lt; "Erro abrindo arquivo " &lt;&lt; argv[1] &lt;&lt; std::endl;
+        return EXIT_FAILURE;
+    }
+
+    fs["mat"] &gt;&gt; image;
+    fs.release();
+
+    if (image.empty()) {
+        std::cout &lt;&lt; "Erro: imagem vazia no arquivo " &lt;&lt; argv[1] &lt;&lt; std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::cout &lt;&lt; "Imagem carregada com sucesso: " &lt;&lt; image.size() &lt;&lt; std::endl;
+
+    int dft_M = cv::getOptimalDFTSize(image.rows);
+    int dft_N = cv::getOptimalDFTSize(image.cols);
+    cv::copyMakeBorder(image, padded, 0, dft_M - image.rows, 0,
+                       dft_N - image.cols, cv::BORDER_CONSTANT,
+                       cv::Scalar::all(0));
+
+    planos.push_back(cv::Mat_&lt;float&gt;(padded));
+
+    planos.push_back(cv::Mat::zeros(padded.size(), CV_32F));
+
+    cv::merge(planos, complexImage);
+
+    cv::dft(complexImage, complexImage);
+    swapQuadrants(complexImage);
+
+    cv::split(complexImage, planos);
+
+    cv::Mat magn, fase;
+    cv::cartToPolar(planos[0], planos[1], magn, fase, false);
+    cv::normalize(fase, fase, 0, 1, cv::NORM_MINMAX);
+
+    cv::magnitude(planos[0], planos[1], magn);
+
+    magn += cv::Scalar::all(1);
+
+    cv::log(magn, magn);
+    cv::normalize(magn, magn, 0, 1, cv::NORM_MINMAX);
+
+    cv::imshow("Espectro de magnitude", magn);
+    cv::imshow("Espectro de fase", fase);
+
+    cv::waitKey();
+    return EXIT_SUCCESS;
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>8.4 Compare o novo espectro de magnitude gerado com o valor teórico da transformada de Fourier da senóide. O que mudou para que o espectro de magnitude gerado agora esteja mais próximo do valor teórico? Porque isso aconteceu?</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Podemos observar que o resultado obtido a partir do arquivo YAML aproxima-se bem mais do resultado esperado , em comparação ao arquivo PNG, poque provavelmente acontesse devido aos tipos de valores com que cada formato trabalha ja que o formato PNG trabalha com valore inteiros truncando os valores fornecidos pela senoide, oque causa perdas de informação, ja o YAML armazena informação em ponto flutuante, diminuindo as perdas ao processar a informação.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Exercicio 9</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Utilizando o programa exemplos/dftfilter.cpp como referência, implemente o filtro homomórfico para melhorar imagens com iluminação irregular. Crie uma cena mal iluminada e ajuste os parâmetros do filtro homomórfico para corrigir a iluminação da melhor forma possível. Assuma que a imagem fornecida é em tons de cinza.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/dftfilter/image.png" alt="Imagem Original">
+</div>
+<div class="title">Figure 3. Imagem original:</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/dftfilter/dft-filter.png" alt="Imagem Resultado">
+</div>
+<div class="title">Figure 4. Resultado: dftfilter.cpp</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: dftfilter.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+void swapQuadrants(cv::Mat&amp; image) {
+  cv::Mat tmp, A, B, C, D;
+
+  // se a imagem tiver tamanho impar, recorta a regiao para o maior
+  // tamanho par possivel (-2 = 1111...1110)
+  image = image(cv::Rect(0, 0, image.cols &amp; -2, image.rows &amp; -2));
+
+  int centerX = image.cols / 2;
+  int centerY = image.rows / 2;
+
+  // rearranja os quadrantes da transformada de Fourier de forma que
+  // a origem fique no centro da imagem
+  // A B   -&gt;  D C
+  // C D       B A
+  A = image(cv::Rect(0, 0, centerX, centerY));
+  B = image(cv::Rect(centerX, 0, centerX, centerY));
+  C = image(cv::Rect(0, centerY, centerX, centerY));
+  D = image(cv::Rect(centerX, centerY, centerX, centerY));
+
+  // swap quadrants (Top-Left with Bottom-Right)
+  A.copyTo(tmp);
+  D.copyTo(A);
+  tmp.copyTo(D);
+
+  // swap quadrant (Top-Right with Bottom-Left)
+  C.copyTo(tmp);
+  B.copyTo(C);
+  tmp.copyTo(B);
+}
+
+void makeHomomorphicFilter(const cv::Mat &amp;image, cv::Mat &amp;filter, double gammaL, double gammaH, double d0, double c) {
+  cv::Mat_&lt;float&gt; filter2D(image.rows, image.cols);
+  int centerX = image.cols / 2;
+  int centerY = image.rows / 2;
+
+  for (int i = 0; i &lt; image.rows; i++) {
+    for (int j = 0; j &lt; image.cols; j++) {
+      double d = sqrt(pow(i - centerY, 2) + pow(j - centerX, 2));
+      double H = (gammaH - gammaL) * (1.0 - exp(-c * (d * d) / (d0 * d0))) + gammaL;
+      filter2D.at&lt;float&gt;(i, j) = static_cast&lt;float&gt;(H);
+    }
+  }
+
+  cv::Mat planes[] = {filter2D, cv::Mat::zeros(filter2D.size(), CV_32F)};
+  cv::merge(planes, 2, filter);
+}
+
+int main(int argc, char** argv) {
+  cv::Mat image, padded, complexImage;
+  std::vector&lt;cv::Mat&gt; planos;
+
+  image = imread(argv[1], cv::IMREAD_GRAYSCALE);
+  if (image.empty()) {
+    std::cout &lt;&lt; "Erro abrindo imagem " &lt;&lt; argv[1] &lt;&lt; std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // expande a imagem de entrada para o melhor tamanho no qual a DFT pode ser
+  // executada, preenchendo com zeros a lateral inferior direita.
+  int dft_M = cv::getOptimalDFTSize(image.rows);
+  int dft_N = cv::getOptimalDFTSize(image.cols);
+  cv::copyMakeBorder(image, padded, 0, dft_M - image.rows, 0, dft_N - image.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+
+  // prepara a matriz complexa para ser preenchida
+  // primeiro a parte real, contendo a imagem de entrada
+  planos.push_back(cv::Mat_&lt;float&gt;(padded));
+  // depois a parte imaginaria com valores nulos
+  planos.push_back(cv::Mat::zeros(padded.size(), CV_32F));
+
+  // combina os planos em uma unica estrutura de dados complexa
+  cv::merge(planos, complexImage);
+
+  // calcula a DFT
+  cv::dft(complexImage, complexImage);
+  swapQuadrants(complexImage);
+
+  // cria o filtro homomórfico e aplica a filtragem de frequencia
+  cv::Mat filter;
+  double gammaL = 0.5, gammaH = 2.0, d0 = 30.0, c = 1.0;
+  makeHomomorphicFilter(complexImage, filter, gammaL, gammaH, d0, c);
+  cv::mulSpectrums(complexImage, filter, complexImage, 0);
+
+  // calcula a DFT inversa
+  swapQuadrants(complexImage);
+  cv::idft(complexImage, complexImage);
+
+  // planos[0] : Re(DFT(image)
+  // planos[1] : Im(DFT(image)
+  cv::split(complexImage, planos);
+
+  // recorta a imagem filtrada para o tamanho original
+  // selecionando a regiao de interesse (roi)
+  cv::Rect roi(0, 0, image.cols, image.rows);
+  cv::Mat result = planos[0](roi);
+
+  // normaliza a parte real para exibicao
+  cv::normalize(result, result, 0, 1, cv::NORM_MINMAX);
+
+  cv::imshow("image", result);
+  cv::imwrite("dft-filter.png", result * 255);
+
+  cv::waitKey();
+  return EXIT_SUCCESS;
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Exercicio 10</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Utilizando os programas exemplos/canny.cpp e exemplos/pontilhismo.cpp como referência, implemente um programa cannypoints.cpp. A idéia é usar as bordas produzidas pelo algoritmo de Canny para melhorar a qualidade da imagem pontilhista gerada. A forma como a informação de borda será usada é livre. Entretanto, são apresentadas algumas sugestões de técnicas que poderiam ser utilizadas:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Desenhar pontos grandes na imagem pontilhista básica;</p>
+</li>
+<li>
+<p>Usar a posição dos pixels de borda encontrados pelo algoritmo de Canny para desenhar pontos nos respectivos locais na imagem gerada.</p>
+</li>
+<li>
+<p>Experimente ir aumentando os limiares do algoritmo de Canny e, para cada novo par de limiares, desenhar círculos cada vez menores nas posições encontradas. A Figura 48, “Pontilhismo aplicado à imagem Lena” foi desenvolvida usando essa técnica.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Escolha uma imagem de seu gosto e aplique a técnica que você desenvolveu.</p>
+</li>
+<li>
+<p>Descreva no seu relatório detalhes do procedimento usado para criar sua técnica pontilhista.</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>O Programa foi modificado de forma que agora receba como parametro, alem da imagem que desejamos criar o pontilhismo, tambem o resultado da imagem desejada submetida ao algoritimo de Canny (Programa canny.cpp), a partir então das informações deste novo parametro, o programa modifica o raio dos pontos (Dobra o tamanho) aos quais o centro coinside com o a bordas detectadas pelo metodo de canny.</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/pontilhismo/imagem.png" alt="Imagem Original">
+</div>
+<div class="title">Figure 5. Imagem original:</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/pontilhismo/simples.jpg" alt="Imagem Sem Canny">
+</div>
+<div class="title">Figure 6. Resultado: ponti.cpp (Sem fazer uso do algoritimo de canny)</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/pontilhismo/pontos.jpg" alt="Imagem Resultado">
+</div>
+<div class="title">Figure 7. Resultado: ponti.cpp (Utilizando do algoritimo de canny)</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: pontiCanny.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;algorithm&gt;
+#include &lt;cstdlib&gt;
+#include &lt;ctime&gt;
+#include &lt;fstream&gt;
+#include &lt;iomanip&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;vector&gt;
+#include &lt;chrono&gt;
+#include &lt;random&gt;
+
+#define STEP 5
+#define JITTER 3
+#define RAIO 3
+#define RAIO2 6
+
+int main(int argc, char** argv) {
+  std::vector&lt;int&gt; yrange;
+  std::vector&lt;int&gt; xrange;
+
+  cv::Mat image, cannyImg, frame, points;
+
+  int width, height, gray;
+  int x, y;
+
+  image = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
+  cannyImg = cv::imread(argv[2], cv::IMREAD_GRAYSCALE);
+
+  std::srand(std::time(0));
+
+  if (image.empty()) {
+    std::cout &lt;&lt; "Could not open or find the image" &lt;&lt; std::endl;
+    return -1;
+  }
+
+  width = image.cols;
+  height = image.rows;
+
+  xrange.resize(height / STEP);
+  yrange.resize(width / STEP);
+
+  std::iota(xrange.begin(), xrange.end(), 0);
+  std::iota(yrange.begin(), yrange.end(), 0);
+
+  for (uint i = 0; i &lt; xrange.size(); i++) {
+    xrange[i] = xrange[i] * STEP + STEP / 2;
+  }
+
+  for (uint i = 0; i &lt; yrange.size(); i++) {
+    yrange[i] = yrange[i] * STEP + STEP / 2;
+  }
+
+  points = cv::Mat(height, width, CV_8U, cv::Scalar(255));
+
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::shuffle(xrange.begin(), xrange.end(), std::default_random_engine(seed));
+
+  for (auto i : xrange) {
+  std::shuffle(yrange.begin(), yrange.end(), std::default_random_engine(seed));
+    for (auto j : yrange) {
+      x = i + std::rand() % (2 * JITTER) - JITTER + 1;
+      y = j + std::rand() % (2 * JITTER) - JITTER + 1;
+      gray = image.at&lt;uchar&gt;(x, y);
+      if(cannyImg.at&lt;uchar&gt;(x, y) != 255){
+        cv::circle(points, cv::Point(y, x), RAIO, CV_RGB(gray, gray, gray),
+        cv::FILLED, cv::LINE_AA);
+      }else{
+        cv::circle(points, cv::Point(y, x), RAIO2, CV_RGB(gray, gray, gray),
+        cv::FILLED, cv::LINE_AA);
+      }
+    }
+  }
+  cv::imwrite("pontos.jpg", points);
+  return 0;
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Exercicio 11</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Utilizando o programa kmeans.cpp como exemplo prepare um programa exemplo onde a execução do código se dê usando o parâmetro nRodadas=1 e inciar os centros de forma aleatória usando o parâmetro KMEANS_RANDOM_CENTERS ao invés de KMEANS_PP_CENTERS. Realize 10 rodadas diferentes do algoritmo e compare as imagens produzidas. Explique porque elas podem diferir tanto.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans0.jpg" alt="Imagem Resultado 1">
+</div>
+<div class="title">Figure 8. Resultado 1: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans1.jpg" alt="Imagem Resultado 2">
+</div>
+<div class="title">Figure 9. Resultado 2: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans2.jpg" alt="Imagem Resultado 3">
+</div>
+<div class="title">Figure 10. Resultado 3: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans3.jpg" alt="Imagem Resultado 4">
+</div>
+<div class="title">Figure 11. Resultado 4: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans4.jpg" alt="Imagem Resultado 5">
+</div>
+<div class="title">Figure 12. Resultado 5: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans5.jpg" alt="Imagem Resultado 6">
+</div>
+<div class="title">Figure 13. Resultado 6: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans6.jpg" alt="Imagem Resultado 7">
+</div>
+<div class="title">Figure 14. Resultado 7: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans7.jpg" alt="Imagem Resultado 8">
+</div>
+<div class="title">Figure 15. Resultado 8: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans8.jpg" alt="Imagem Resultado 9">
+</div>
+<div class="title">Figure 16. Resultado 9: kmeans.cpp</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../PDI/Bolhas/kmeans9.jpg" alt="Imagem Resultado 10">
+</div>
+<div class="title">Figure 17. Resultado 10: kmeans.cpp</div>
+</div>
+<div class="listingblock">
+<div class="title">Programa: kmeans.cpp</div>
+<div class="content">
+<pre class="highlight"><code class="language-cpp" data-lang="cpp">#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+int main(int argc, char** argv) {
+  int nClusters = 8, nRodadas = 1, rp = 0;
+
+  cv::Mat rotulos, centros;
+
+  if (argc != 3) {
+    std::cout &lt;&lt; "kmeans entrada.jpg saida.jpg\n";
+    exit(0);
+  }
+for(rp = 0; rp&lt;10; rp++){
+  cv::Mat img = cv::imread(argv[1], cv::IMREAD_COLOR);
+  cv::Mat samples(img.rows * img.cols, 3, CV_32F);
+
+  for (int y = 0; y &lt; img.rows; y++) {
+    for (int x = 0; x &lt; img.cols; x++) {
+      for (int z = 0; z &lt; 3; z++) {
+        samples.at&lt;float&gt;(y + x * img.rows, z) = img.at&lt;cv::Vec3b&gt;(y, x)[z];
+      }
+    }
+  }
+
+  cv::kmeans(samples, nClusters, rotulos, cv::TermCriteria(cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 10000, 0.0001), nRodadas, cv::KMEANS_RANDOM_CENTERS, centros);
+
+  cv::Mat rotulada(img.size(), img.type());
+  for (int y = 0; y &lt; img.rows; y++) {
+    for (int x = 0; x &lt; img.cols; x++) {
+      int indice = rotulos.at&lt;int&gt;(y + x * img.rows, 0);
+      rotulada.at&lt;cv::Vec3b&gt;(y, x)[0] = (uchar)centros.at&lt;float&gt;(indice, 0);
+      rotulada.at&lt;cv::Vec3b&gt;(y, x)[1] = (uchar)centros.at&lt;float&gt;(indice, 1);
+      rotulada.at&lt;cv::Vec3b&gt;(y, x)[2] = (uchar)centros.at&lt;float&gt;(indice, 2);
+    }
+  }
+  cv::imshow("kmeans", rotulada);
+  cv::imwrite("kmeans"+ std::to_string(rp)+ ".jpg", rotulada);
+  cv::waitKey();
+  }
+}</code></pre>
+</div>
+</div>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>A diferença notavel entre as imagens acontece pois, ao aleatorizar os centros (mudando a posição de partida) leva o metodo a encontrar distintos caminhos de convergencia, e por sua vez a resultados diferentes.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-04-20 18:38:41 -0300
+Last updated 2024-07-14 17:34:04 -0300
 </div>
 </div>
 </body>
